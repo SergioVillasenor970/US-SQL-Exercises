@@ -51,3 +51,60 @@ JOIN usuarios ON clientes.usuarioId = usuarios.id
 GROUP BY usuarios.nombre
 ORDER BY COUNT(DISTINCT productos.id)
 LIMIT 1;
+
+#Querys with filters
+#1:
+
+SELECT usuarios.nombre
+FROM pedidos
+JOIN clientes ON pedidos.clienteId = clientes.id
+JOIN usuarios ON clientes.usuarioId = usuarios.id
+WHERE TIMESTAMPDIFF(YEAR, Clientes.fechaNacimiento, pedidos.fechaRealizacion) >= 18;
+
+#2:
+
+SELECT pr.id AS producto_id, pr.nombre
+FROM Productos pr
+WHERE pr.id NOT IN (
+  SELECT lp.productoId
+  FROM LineasPedido lp
+  JOIN Pedidos p ON lp.pedidoId = p.id
+  JOIN Clientes c ON p.clienteId = c.id
+  WHERE TIMESTAMPDIFF(YEAR, c.fechaNacimiento, CURDATE()) < 18
+);
+
+#3:
+
+SELECT pedidos.id, productos.nombre, lineaspedido.unidades
+FROM lineaspedido
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN productos ON lineaspedido.productoId = productos.id;
+
+#4:
+
+SELECT productos.nombre, productos.precio
+FROM productos
+WHERE (productos.puedeVenderseAMenores = FALSE);
+
+#5:
+
+SELECT usuarios.id
+FROM lineaspedido
+JOIN productos ON lineaspedido.productoId = productos.id
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN usuarios ON pedidos.clienteId = usuarios.id
+HAVING (
+
+SELECT SUM(lineaspedido.unidades)
+FROM lineaspedido
+JOIN productos ON lineaspedido.productoId = productos.id
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN usuarios ON pedidos.clienteId = usuarios.id
+WHERE (productos.puedeVenderseAMenores = FALSE)) > (
+
+SELECT SUM(lineaspedido.unidades)
+FROM lineaspedido
+JOIN productos ON lineaspedido.productoId = productos.id
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN usuarios ON pedidos.clienteId = usuarios.id
+WHERE (productos.puedeVenderseAMenores = TRUE));
