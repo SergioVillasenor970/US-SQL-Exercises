@@ -108,3 +108,61 @@ JOIN productos ON lineaspedido.productoId = productos.id
 JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
 JOIN usuarios ON pedidos.clienteId = usuarios.id
 WHERE (productos.puedeVenderseAMenores = TRUE));
+
+#Subquerys and calculations
+#1:
+
+SELECT usuarios.nombre
+FROM lineaspedido
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN clientes ON pedidos.clienteId = clientes.id
+JOIN usuarios ON clientes.usuarioId = usuarios.id
+GROUP BY usuarios.id
+ORDER BY SUM(lineaspedido.unidades) DESC
+LIMIT 1;
+
+#2:
+
+SELECT SUM(lineaspedido.unidades * lineaspedido.precio)
+FROM lineaspedido
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+GROUP BY pedidos.id;
+
+#3:
+
+#Revisar, bastante complicado
+
+#4:
+
+SELECT productos.nombre
+FROM productos
+WHERE productos.id NOT IN
+(SELECT lineaspedido.productoId
+FROM lineaspedido);
+
+#5:
+
+SELECT MONTH(pedidos.fechaRealizacion), SUM(LineasPedido.precio * LineasPedido.unidades) 
+FROM Pedidos 
+JOIN LineasPedido ON Pedidos.id = LineasPedido.pedidoId
+GROUP BY MONTH(pedidos.fechaRealizacion);
+
+#6:
+
+SELECT empleados.id, SUM(lineaspedido.unidades * lineaspedido.precio)
+FROM lineaspedido
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN empleados ON pedidos.empleadoId = empleados.id
+GROUP BY empleados.id
+ORDER BY SUM(lineaspedido.unidades * lineaspedido.precio) DESC
+LIMIT 10;
+
+#7:
+
+SELECT usuarios.nombre
+FROM lineaspedido
+JOIN pedidos ON lineaspedido.pedidoId = pedidos.id
+JOIN empleados ON pedidos.empleadoId = empleados.id
+JOIN usuarios ON empleados.usuarioId = usuarios.id
+GROUP BY empleados.id
+HAVING SUM(lineaspedido.unidades * lineaspedido.precio) >= 1000
