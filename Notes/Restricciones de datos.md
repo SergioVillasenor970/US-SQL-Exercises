@@ -94,4 +94,6 @@ SELECT columna INTO nombreVariable
 FROM tabla WHERE condicion
 ```
 
-Se detallará más adelante al ver las consultas
+Se detallará más adelante al ver las consultas.
+
+Importante: consultar CONSTRAINT
